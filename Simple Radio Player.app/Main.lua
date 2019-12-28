@@ -25,8 +25,20 @@ local function saveConfig()
 	filesystem.writeTable(cfgPath, config, true)
 end
 
+function tableLength(table)
+	local count = 0
+	for _ in pairs(table) do count = count + 1 end
+	return count
+end
 
-
+function normalizeIndexes(table)
+	for j = 1, tableLength(table) do
+		if table[j]==nil then
+			table[j], table[j+1]=table[j+1],table[j]
+		end
+	end
+	return table
+end
 
 --Check if the config file exists or not, if not, create it
 if filesystem.exists(cfgPath) then
@@ -57,20 +69,6 @@ local function setVolume(volume)
 	end
 end
 
-function tableLength(table)
-	local count = 0
-	for _ in pairs(table) do count = count + 1 end
-	return count
-end
-
-function normalizeIndexes(table)
-	for j = 1, tableLength(table) do
-		if table[j]==nil then
-			table[j], table[j+1]=table[j+1],table[j]
-		end
-	end
-	return table
-end
 
 --Some Window Stuff
 window:addChild(GUI.panel(1, 3, window.width, window.height, 0x2d2d2d))
