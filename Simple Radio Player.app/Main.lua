@@ -31,6 +31,7 @@ end
 --Check if the config file exists or not, if not, create it
 if filesystem.exists(cfgPath) then
 	config = filesystem.readTable(cfgPath)
+	config=normalizeIndexes(config)
 else
 	config = {
 		{
@@ -60,6 +61,15 @@ function tableLength(table)
 	local count = 0
 	for _ in pairs(table) do count = count + 1 end
 	return count
+end
+
+function normalizeIndexes(table)
+	for j = 1, tableLength(table) do
+		if table[j]==nil then
+			table[j], table[j+1]=table[j+1],table[j]
+		end
+	end
+	return table
 end
 
 --Some Window Stuff
@@ -97,11 +107,13 @@ end
 
 --Update List with custom stations
 function updateList()
+	local lastSelected = customList.selectedItem
 	customList:remove()
 	customList = window:addChild(GUI.list(60, 4, 38, 19, 1, 0, 0xE1E1E1, 0x4B4B4B, 0xD2D2D2, 0x4B4B4B, 0x3366CC, 0xa5a5a5, false))
 	for i = 1, tableLength(config) do
 		customList:addItem(config[i].name)
 	end
+	customList.selectedItem=lastSelected
 end
 --Update List with custom stations
 
@@ -118,6 +130,7 @@ window:addChild(GUI.roundedButton(69, 24, 6, 1, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x
 	config[customList.selectedItem].name = nameInput.text
 	config[customList.selectedItem].url = urlInput.text
 	config[customList.selectedItem].color = screenColorSelector.color
+	config=normalizeIndexes(config)
 	saveConfig()
 	updateList()
 end
@@ -132,13 +145,18 @@ window:addChild(GUI.roundedButton(77, 24, 5, 1, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x
 		  	color=screenColorSelector.color, 
 		}
 		table.insert(config, new)
+		config=normalizeIndexes(config)
 		saveConfig()
 		updateList()
 	end
 end
+window:addChild(GUI.roundedButton(84, 24, 5, 1, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, "del")).onTouch = function()
+	config[customList.selectedItem]=nil
+	config=normalizeIndexes(config)
+	saveConfig()
+	updateList()
+end
 --List Utils Buttons
-
-
 
 
 window:addChild(GUI.button(33, 21, 26, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, "srpCloud Stations")).onTouch = function()
@@ -189,6 +207,7 @@ window:addChild(GUI.button(33, 21, 26, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a
 			  	color=0x6495ed, 
 			}
 			table.insert(config, new)
+			config=normalizeIndexes(config)
 			saveConfig()
 			updateList()
 		end
