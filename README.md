@@ -1,12 +1,12 @@
 # SimpleRadioPlayer
-Application for MineOS
+## Application for MineOS
 
-This program requires:
-    Mods:
-     -OpenFM Mod
-     -OpenComputers Mod
++ This program requires:
+  + Mods:
+    + OpenFM Mod
+    + OpenComputers Mod
     
-    In-game requirements:
-     -Installed MineOS 
-     -Internet Card
-     -OpenFM Radio connected to your Computer
+  + In-game requirements:
+    + Installed [MineOS](https://github.com/IgorTimofeev/MineOS)
+    + Internet Card
+    + OpenFM Radio connected to your Computer
