@@ -1,5 +1,5 @@
 # SimpleRadioPlayer
-## Application for MineOS
+### Application for MineOS
 
 + This program requires:
   + Mods:
