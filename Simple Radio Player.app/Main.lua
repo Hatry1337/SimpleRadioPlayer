@@ -25,13 +25,26 @@ local function saveConfig()
 	filesystem.writeTable(cfgPath, config, true)
 end
 
-function tableLength(table)
+local function hex_to_char(x)
+  return string.char(tonumber(x, 16))
+end
+
+local function percentDecode(text)
+  if text == nil then
+    return
+  end
+  text = text:gsub("+", " ")
+  text = text:gsub("%%(%x%x)", hex_to_char)
+  return text
+end
+
+local function tableLength(table)
 	local count = 0
 	for _ in pairs(table) do count = count + 1 end
 	return count
 end
 
-function normalizeIndexes(table)
+local function normalizeIndexes(table)
 	for j = 1, tableLength(table) do
 		if table[j]==nil then
 			table[j], table[j+1]=table[j+1],table[j]
@@ -104,7 +117,7 @@ end
 
 
 --Update List with custom stations
-function updateList()
+local function updateList()
 	local lastSelected = customList.selectedItem
 	customList:remove()
 	customList = window:addChild(GUI.list(60, 4, 38, 19, 1, 0, 0xE1E1E1, 0x4B4B4B, 0xD2D2D2, 0x4B4B4B, 0x3366CC, 0xa5a5a5, false))
@@ -166,14 +179,14 @@ window:addChild(GUI.button(33, 21, 26, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a
 	local pageText = tableContainer:addChild(GUI.text(25, 33, 0xc3c3c3, "1"))	
 
 	local data
-	function updateShit(page)
+	local function updateShit(page)
 		shittyList:remove()
 		shittyList = tableContainer:addChild(GUI.list(1, 2, 50, 30, 1, 0, 0xE1E1E1, 0x4B4B4B, 0xD2D2D2, 0x4B4B4B, 0x3366CC, 0xc3c3c3, false))
 		
 		local req = internet.request("http://rainbowbot.xyz:1337/api/opencomputers/srp/get/"..page.."/")
 		data = json.decode(req)
 		for i = 1, tableLength(data) do
-			shittyList:addItem(data[i].name.."  |  "..data[i].author)
+			shittyList:addItem(percentDecode(data[i].name.."  |  "..data[i].author))
 		end
 		pageText:remove()
 		pageText = tableContainer:addChild(GUI.text(25, 33, 0xc3c3c3, page))
@@ -200,8 +213,8 @@ window:addChild(GUI.button(33, 21, 26, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a
 			return
 		else
 			local new = {
-			  	url=data[shittyList.selectedItem].url,
-			  	name=data[shittyList.selectedItem].name, 
+			  	url=percentDecode(data[shittyList.selectedItem].url),
+			  	name=percentDecode(data[shittyList.selectedItem].name), 
 			  	color=0x6495ed, 
 			}
 			table.insert(config, new)
@@ -218,9 +231,9 @@ window:addChild(GUI.button(3, 21, 26, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a,
 		GUI.alert("Name or URL can't be empty!")
 	else
 		local new_item = {
-			name=nameInput.text,
-			url=urlInput.text,
-			author=system.getUser():gsub("/", ""),
+			name=internet.encode(nameInput.text),
+			url=internet.encode(urlInput.text),
+			author=internet.encode(system.getUser():gsub("/", "")),
 		}
 		local data_encoded = json.encode(new_item)
 		local req = internet.request("http://rainbowbot.xyz:1337/api/opencomputers/srp/upload/", data_encoded)
