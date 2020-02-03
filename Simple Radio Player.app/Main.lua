@@ -18,7 +18,6 @@ if not component.isAvailable("internet") then
 	internetFeatures = false
 end
 
-
 local cfgPath = paths.user.applicationData .. "SimpleRadioPlayer/Stations.cfg"--Application folder path
 local fm = component.openfm_radio--OpenFM Radio component
 local workspace = GUI.workspace()
