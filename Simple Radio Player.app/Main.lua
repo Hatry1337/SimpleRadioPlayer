@@ -6,10 +6,16 @@ local paths = require("Paths")
 local internet = require("Internet")
 local json = require("JSON")
 --------------------------------------------------------------------------------------------------------------------------
+local internetFeatures = true
+
 --Check radio exists or not
 if not component.isAvailable("openfm_radio") then
 	GUI.alert("This program needs a OpenFM Radio")
 	return
+end
+--Check internet card exist or not
+if not component.isAvailable("internet") then
+	internetFeatures = false
 end
 
 
@@ -171,72 +177,80 @@ end
 
 
 window:addChild(GUI.button(33, 21, 26, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, "srpCloud Stations")).onTouch = function()
-	local container = GUI.addBackgroundContainer(workspace, true, true, "srpCloud Stations")
-	local tableContainer = container.layout:addChild(GUI.container(1, 1, 50, 35))
-	tableContainer:addChild(GUI.panel(1, 1, 50, 1, 0x2d2d2d))
-	tableContainer:addChild(GUI.text(1, 1, 0xc3c3c3, "                 Name  |  Author"))
-	local shittyList = tableContainer:addChild(GUI.list(1, 2, 50, 30, 1, 0, 0xE1E1E1, 0x4B4B4B, 0xD2D2D2, 0x4B4B4B, 0x3366CC, 0xc3c3c3, false))
-	local pageText = tableContainer:addChild(GUI.text(25, 33, 0xc3c3c3, "1"))	
+	if internetFeatures then
+		local container = GUI.addBackgroundContainer(workspace, true, true, "srpCloud Stations")
+		local tableContainer = container.layout:addChild(GUI.container(1, 1, 50, 35))
+		tableContainer:addChild(GUI.panel(1, 1, 50, 1, 0x2d2d2d))
+		tableContainer:addChild(GUI.text(1, 1, 0xc3c3c3, "                 Name  |  Author"))
+		local shittyList = tableContainer:addChild(GUI.list(1, 2, 50, 30, 1, 0, 0xE1E1E1, 0x4B4B4B, 0xD2D2D2, 0x4B4B4B, 0x3366CC, 0xc3c3c3, false))
+		local pageText = tableContainer:addChild(GUI.text(25, 33, 0xc3c3c3, "1"))	
 
-	local data
-	local function updateShit(page)
-		shittyList:remove()
-		shittyList = tableContainer:addChild(GUI.list(1, 2, 50, 30, 1, 0, 0xE1E1E1, 0x4B4B4B, 0xD2D2D2, 0x4B4B4B, 0x3366CC, 0xc3c3c3, false))
-		
-		local req = internet.request("http://rainbowbot.xyz:1337/api/opencomputers/srp/get/"..page.."/")
-		data = json.decode(req)
-		for i = 1, tableLength(data) do
-			shittyList:addItem(percentDecode(data[i].name.."  |  "..data[i].author))
+		local data
+		local function updateShit(page)
+			shittyList:remove()
+			shittyList = tableContainer:addChild(GUI.list(1, 2, 50, 30, 1, 0, 0xE1E1E1, 0x4B4B4B, 0xD2D2D2, 0x4B4B4B, 0x3366CC, 0xc3c3c3, false))
+			
+			local req = internet.request("http://rainbowbot.xyz:1337/api/opencomputers/srp/get/"..page.."/")
+			data = json.decode(req)
+			for i = 1, tableLength(data) do
+				shittyList:addItem(percentDecode(data[i].name.."  |  "..data[i].author))
+			end
+			pageText:remove()
+			pageText = tableContainer:addChild(GUI.text(25, 33, 0xc3c3c3, page))
 		end
-		pageText:remove()
-		pageText = tableContainer:addChild(GUI.text(25, 33, 0xc3c3c3, page))
-	end
 
-	local pageNum = 1
-	updateShit(pageNum)
-	tableContainer:addChild(GUI.roundedButton(18, 33, 5, 1, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, "<")).onTouch = function()
-		if pageNum <= 1 then
-			pageNum = 1
-			GUI.alert("Minimum page is 1!")
-		else
-			pageNum=pageNum-1
-		end
+		local pageNum = 1
 		updateShit(pageNum)
-	end
-	tableContainer:addChild(GUI.roundedButton(28, 33, 5, 1, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, ">")).onTouch = function()
-		pageNum=pageNum+1
-		updateShit(pageNum)
-	end
-	container.layout:addChild(GUI.roundedButton(17, 33, 15, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, "Save it!")).onTouch = function()
-		if tableLength(config) >= 19 then
-			GUI.alert("You can't add more than 19 stations!")
-			return
-		else
-			local new = {
-			  	url=percentDecode(data[shittyList.selectedItem].url),
-			  	name=percentDecode(data[shittyList.selectedItem].name), 
-			  	color=0x6495ed, 
-			}
-			table.insert(config, new)
-			config=normalizeIndexes(config)
-			saveConfig()
-			updateList()
+		tableContainer:addChild(GUI.roundedButton(18, 33, 5, 1, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, "<")).onTouch = function()
+			if pageNum <= 1 then
+				pageNum = 1
+				GUI.alert("Minimum page is 1!")
+			else
+				pageNum=pageNum-1
+			end
+			updateShit(pageNum)
 		end
+		tableContainer:addChild(GUI.roundedButton(28, 33, 5, 1, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, ">")).onTouch = function()
+			pageNum=pageNum+1
+			updateShit(pageNum)
+		end
+		container.layout:addChild(GUI.roundedButton(17, 33, 15, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, "Save it!")).onTouch = function()
+			if tableLength(config) >= 19 then
+				GUI.alert("You can't add more than 19 stations!")
+				return
+			else
+				local new = {
+				  	url=percentDecode(data[shittyList.selectedItem].url),
+				  	name=percentDecode(data[shittyList.selectedItem].name), 
+				  	color=0x6495ed, 
+				}
+				table.insert(config, new)
+				config=normalizeIndexes(config)
+				saveConfig()
+				updateList()
+			end
+		end
+	else
+		GUI.alert("This feature does not work without an Internet card. Install the Internet card and restart the program.")
 	end
 end
 
 
 window:addChild(GUI.button(3, 21, 26, 3, 0x5a5a5a, 0xa5a5a5, 0x969696, 0x5a5a5a, "Upload to srpCloud")).onTouch = function()
-	if nameInput.text == "Name" or urlInput.text == "URL" or nameInput.text == "" or urlInput.text == "" then
-		GUI.alert("Name or URL can't be empty!")
+	if internetFeatures then
+		if nameInput.text == "Name" or urlInput.text == "URL" or nameInput.text == "" or urlInput.text == "" then
+			GUI.alert("Name or URL can't be empty!")
+		else
+			local new_item = {
+				name=internet.encode(nameInput.text),
+				url=internet.encode(urlInput.text),
+				author=internet.encode(system.getUser():gsub("/", "")),
+			}
+			local data_encoded = json.encode(new_item)
+			local req = internet.request("http://rainbowbot.xyz:1337/api/opencomputers/srp/upload/", data_encoded)
+		end
 	else
-		local new_item = {
-			name=internet.encode(nameInput.text),
-			url=internet.encode(urlInput.text),
-			author=internet.encode(system.getUser():gsub("/", "")),
-		}
-		local data_encoded = json.encode(new_item)
-		local req = internet.request("http://rainbowbot.xyz:1337/api/opencomputers/srp/upload/", data_encoded)
+		GUI.alert("This feature does not work without an Internet card. Install the Internet card and restart the program.")
 	end
 end
 
