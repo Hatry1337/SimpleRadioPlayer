@@ -1,4 +1,4 @@
-# SimpleRadioPlayer
+# Simple Radio Player
 ### Application for MineOS
 
 + This program requires:
