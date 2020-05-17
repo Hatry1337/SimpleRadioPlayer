@@ -65,9 +65,9 @@ if filesystem.exists(cfgPath) then
 else
 	config = {
 		{
-			url="https://www.dropbox.com/s/raw/s29m6dc9qo9pjlm/Los%20Del%20Rio%20-%20Macarena.mp3",
-			color=0x43d143,
-			name="Los Del Rio - Macarena",
+			url="https://air.rainbowbot.xyz",
+			color=0xFF00FF,
+			name="RainbowFM",
 		}
 	}
 	saveConfig()
